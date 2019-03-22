@@ -1,3 +1,4 @@
 *.docx
 SDK_C++
 SDK_java
+*.gz
