@@ -13,7 +13,7 @@ import numpy as np
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
-from load_data import cross_data,road_data,car_data
+from load_data import cross_data,road_data
 
 
 #G = nx.Graph()
@@ -31,6 +31,8 @@ for i in range(road_data.shape[0]):
     attribute['channel']=road_data.iloc[i,3]
     #road_index = ()
     road.append((road_data.iloc[i,4],road_data.iloc[i,5],attribute))
+    if road_data.iloc[i,6]:
+            road.append((road_data.iloc[i,5],road_data.iloc[i,4],attribute))
 
 D.add_edges_from(road)
 

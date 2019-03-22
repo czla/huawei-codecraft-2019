@@ -12,9 +12,9 @@ import sys
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
-car_file = '../../config/car.txt'
-cross_file = '../../config/cross.txt'
-road_file = '../../config/road.txt'
+car_file = '../../1-map-training-1/car.txt'
+cross_file = '../../1-map-training-1/cross.txt'
+road_file = '../../1-map-training-1/road.txt'
 
 car_data = pd.read_csv(car_file, sep = ',')
 car_data.rename(columns = lambda x:x.replace('#(','').replace(')',''), inplace=True)
