@@ -38,3 +38,7 @@
 [2019-03-24 00:05:47] INFO [main: CodeCraft-2019.py, 20] please input args: car_path, road_path, cross_path, answerPath
 [2019-03-24 00:09:34] INFO [main: CodeCraft-2019.py, 21] please input args: car_path, road_path, cross_path, answerPath
 [2019-03-24 00:10:12] INFO [main: CodeCraft-2019.py, 20] please input args: car_path, road_path, cross_path, answerPath
+[2019-03-24 21:36:57] INFO [main: CodeCraft-2019.py, 23] car_path is ../config/car.txt
+[2019-03-24 21:36:57] INFO [main: CodeCraft-2019.py, 24] road_path is ../config/road.txt
+[2019-03-24 21:36:57] INFO [main: CodeCraft-2019.py, 25] cross_path is ../config/cross.txt
+[2019-03-24 21:36:57] INFO [main: CodeCraft-2019.py, 26] answer_path is ../config/answer.txt
