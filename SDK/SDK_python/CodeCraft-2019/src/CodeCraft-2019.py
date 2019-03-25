@@ -1,30 +1,31 @@
-import logging
+#import logging
 import sys
 import pandas as pd
 import numpy as np
 #from collections import defaultdict
 
-logging.basicConfig(level=logging.DEBUG,
-                    filename='../../logs/CodeCraft-2019.log',
-                    format='[%(asctime)s] %(levelname)s [%(funcName)s: %(filename)s, %(lineno)d] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    filemode='a')
+
+#logging.basicConfig(level=logging.DEBUG,
+#                    filename='../../logs/CodeCraft-2019.log',
+#                    format='[%(asctime)s] %(levelname)s [%(funcName)s: %(filename)s, %(lineno)d] %(message)s',
+#                    datefmt='%Y-%m-%d %H:%M:%S',
+#                    filemode='a')
 
 
 def main():
-    if len(sys.argv) != 5:
-        logging.info('please input args: car_path, road_path, cross_path, answerPath')
-        exit(1)
+#    if len(sys.argv) != 5:
+#        logging.info('please input args: car_path, road_path, cross_path, answerPath')
+#        exit(1)
 
     car_path = sys.argv[1]
     road_path = sys.argv[2]
     cross_path = sys.argv[3]
     answer_path = sys.argv[4]
-
-    logging.info("car_path is %s" % (car_path))
-    logging.info("road_path is %s" % (road_path))
-    logging.info("cross_path is %s" % (cross_path))
-    logging.info("answer_path is %s" % (answer_path))
+#
+#    logging.info("car_path is %s" % (car_path))
+#    logging.info("road_path is %s" % (road_path))
+#    logging.info("cross_path is %s" % (cross_path))
+#    logging.info("answer_path is %s" % (answer_path))
     
 #    road_path = '../config/road.txt'
 #    car_path = '../config/car.txt'
@@ -43,7 +44,13 @@ def main():
     road_data['id'] = road_data['id'].str.split('(').str[1]
     road_data['isDuplex'] = road_data['isDuplex'].str.split(')').str[0]
     #print(road_data.head())
-
+    
+    cross_data = pd.read_csv(cross_path, sep = ',')
+    cross_data.columns = ['id','roadIdU','roadIdR','roadIdD','roadIdL']
+    cross_data['id'] = cross_data['id'].str.split('(').str[1]
+    cross_data['roadIdL'] = cross_data['roadIdL'].str.split(')').str[0]
+    #print(cross_data.head())
+    
     class Graph():
         def __init__(self):
             """
@@ -71,9 +78,12 @@ def main():
     
     road = []
     for i in range(road_data.shape[0]):
-        road.append((str(road_data.iloc[i,4]),str(road_data.iloc[i,5]),road_data.iloc[i,1]))
-        if road_data.iloc[i,6]:
-                road.append((str(road_data.iloc[i,5]),str(road_data.iloc[i,4]),road_data.iloc[i,1]))
+        w_s = 1 #weight for speed
+        w_c = 2 #weight for channel
+        edge_weight = max(road_data.iloc[i,1] - w_s * road_data.iloc[i,2] - w_c * road_data.iloc[i,3],0)
+        road.append((str(road_data.iloc[i,4]),str(road_data.iloc[i,5]),edge_weight))
+        if int(road_data.iloc[i,6]) > 0:
+                road.append((str(road_data.iloc[i,5]),str(road_data.iloc[i,4]),edge_weight))
 
     for edge in road:
         graph.add_edge(*edge)
@@ -144,10 +154,11 @@ def main():
         
         # plant time
         delay_chance = np.random.uniform(0, 1)
-        if delay_chance > 0.5:
-            route_i_road.append(int(car_data.iloc[j,4]) + 1)
+        if delay_chance > 0.4:
+            route_i_road.append(int(car_data.iloc[j,4]) + np.random.randint(1,4))
         else:
             route_i_road.append(int(car_data.iloc[j,4]))
+        #route_i_road.append(int(car_data.iloc[j,4]))
         #add car route
         route_i_road.append([get_road_from_two_cross(int(i[-1][j]),int(i[-1][j+1])) for j in range(len(i[-1])-1)])
         route_road.append(route_i_road)
@@ -161,7 +172,7 @@ def main():
             f.write(')\n')
 
     # process
-    
+#    print('Done')
     # to write output file
 
 
