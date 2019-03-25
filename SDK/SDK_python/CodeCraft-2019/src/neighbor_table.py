@@ -1,119 +1,172 @@
+import pandas
+import numpy as np
+cross = open('../config/cross.txt')
+car = open('../config/car.txt')
+road = open('../config/road.txt')
 
-class Graph():
-    def __init__(self):
-        """
-        self.edges is a dict of all possible next nodes
-        e.g. {'X': ['A', 'B', 'C', 'E'], ...}
-        self.weights has all the weights between two nodes,
-        with the two nodes as a tuple as the key
-        e.g. {('X', 'A'): 7, ('X', 'B'): 2, ...}
-        """
-        self.edges = defaultdict(list)
-        self.weights = {}
-    
-    def add_edge(self, from_node, to_node, weight):
-        # Note: assumes edges are bi-directional
-        self.edges[from_node].append(to_node)
-        self.edges[to_node].append(from_node)
-        self.weights[(from_node, to_node)] = weight
-        self.weights[(to_node, from_node)] = weight
+cross_lines = cross.readlines()
+car_lines = car.readlines()
+road_lines = road.readlines()
 
-graph = Graph()
+cross_list= []
+car_list = []
+road_list = []
 
-road_path = '../config/road.txt'
-car_path = '../config/car.txt'
-cross_path = '../config/cross.txt'
-answer_path = '../config/answer.txt'
+for line in cross_lines:
+    if '#' in line:
+        continue
+    newline = line.replace('(','').replace(')','').replace(',','')
+    num = list(map(int,newline.split(" ")))
+    cross_list.append(num)
+cross_array = np.array(cross_list)
+#print(cross_array)
 
-car_data = pd.read_csv(car_path, sep = ',')
-car_data.rename(columns = lambda x:x.replace('#(','').replace(')',''), inplace=True)
-car_data['id'] = car_data['id'].str.split('(').str[1]
-car_data['planTime'] = car_data['planTime'].str.split(')').str[0]
-print(car_data.head())
-    
-road_data = pd.read_csv(road_path, sep = ',')
-road_data.rename(columns = lambda x:x.replace('#(','').replace(')',''), inplace=True)
-road_data['id'] = road_data['id'].str.split('(').str[1]
-road_data['isDuplex'] = road_data['isDuplex'].str.split(')').str[0]
-print(road_data.head())
+for line in car_lines:
+    if '#' in line:
+        continue
+    newline = line.replace('(','').replace(')','').replace(',','')
+    num = list(map(int,newline.split(" ")))
+    car_list.append(num)
+car_array = np.array(car_list)
+#print(car_array)
 
-road = []
-for i in range(road_data.shape[0]):
-    road.append((str(road_data.iloc[i,4]),str(road_data.iloc[i,5]),road_data.iloc[i,1]))
-    if road_data.iloc[i,6]:
-            road.append((str(road_data.iloc[i,5]),str(road_data.iloc[i,4]),road_data.iloc[i,1]))
-                
-#print(road)
+for line in road_lines:
+    if '#' in line:
+        continue
+    newline = line.replace('(','').replace(')','').replace(',','')
+    num = list(map(int,newline.split(" ")))
+    road_list.append(num)
+road_array = np.array(road_list)
+#print(road_array)
 
-for edge in road:
-    graph.add_edge(*edge)
-
-def dijsktra(graph, initial, end):
-    # shortest paths is a dict of nodes
-    # whose value is a tuple of (previous node, weight)
-    shortest_paths = {initial: (None, 0)}
-    current_node = initial
-    visited = set()
-    
-    while current_node != end:
-        visited.add(current_node)
-        destinations = graph.edges[current_node]
-        weight_to_current_node = shortest_paths[current_node][1]
-
-        for next_node in destinations:
-            weight = graph.weights[(current_node, next_node)] + weight_to_current_node
-            if next_node not in shortest_paths:
-                shortest_paths[next_node] = (current_node, weight)
-            else:
-                current_shortest_weight = shortest_paths[next_node][1]
-                if current_shortest_weight > weight:
-                    shortest_paths[next_node] = (current_node, weight)
+max = car_array[0,2]
+for i in range(1,car_array.shape[0]):
+    if max < car_array[i,2]:
+        max = car_array[i,2]
+#print(max)
+#print(car_array)
         
-        next_destinations = {node: shortest_paths[node] for node in shortest_paths if node not in visited}
-        if not next_destinations:
-            return "Route Not Possible"
-        # next node is the destination with the lowest weight
-        current_node = min(next_destinations, key=lambda k: next_destinations[k][1])
-    
-    # Work back through destinations in shortest path
-    path = []
-    while current_node is not None:
-        path.append(current_node)
-        next_node = shortest_paths[current_node][0]
-        current_node = next_node
-    # Reverse path
-    path = path[::-1]
-    return path
+node = []
+for i in range(1,max+1):
+    node.append(i)
+#print(node)  
 
-print(dijsktra(graph, '1', '34'))
+node_list = []
+for i in range(0,road_array.shape[0]):
+    info = [road_array[i,4],road_array[i,5],road_array[i,1]]
+    node_info = tuple(info)
+    node_list.append(node_info)
+    if road_array[i,6] == 1:
+        info1 = [road_array[i,5],road_array[i,4],road_array[i,1]]
+        node_info1 = tuple(info1)
+        node_list.append(node_info1)
+#print(node_list)
+
+
+#最短
+INF_val = 9999
+
+class Dijkstra_Path():
+    def __init__(self, node_map):
+        self.node_map = node_map
+        self.node_length = len(node_map)
+        self.used_node_list = []
+        self.collected_node_dict = {}
+
+    def __call__(self, from_node, to_node):
+        self.from_node = from_node
+        self.to_node = to_node
+        self._init_dijkstra()
+        return self._format_path()
+
+    def _init_dijkstra(self):
+        ## Add from_node to used_node_list
+        self.used_node_list.append(self.from_node)
+        for index1 in range(self.node_length):
+            self.collected_node_dict[index1] = [INF_val, -1]
+
+        self.collected_node_dict[self.from_node] = [0, -1]  # from_node don't have pre_node
+        for index1, weight_val in enumerate(self.node_map[self.from_node]):
+            if weight_val:
+                self.collected_node_dict[index1] = [weight_val, self.from_node]  # [weight_val, pre_node]
+
+        self._foreach_dijkstra()
+
+    def _foreach_dijkstra(self):
+        while (len(self.used_node_list) < self.node_length - 1):
+            min_key = -1
+            min_val = INF_val
+            for key, val in self.collected_node_dict.items():  # 遍历已有权值节点
+                if val[0] < min_val and key not in self.used_node_list:
+                    min_key = key
+                    min_val = val[0]
+
+                    ## 把最小的值加入到used_node_list
+            if min_key != -1:
+                self.used_node_list.append(min_key)
+
+            for index1, weight_val in enumerate(self.node_map[min_key]):
+                ## 对刚加入到used_node_list中的节点的相邻点进行遍历比较
+                if weight_val > 0 and self.collected_node_dict[index1][0] > weight_val + min_val:
+                    self.collected_node_dict[index1][0] = weight_val + min_val  # update weight_val
+                    self.collected_node_dict[index1][1] = min_key
+
+    def _format_path(self):
+        node_list = []
+        temp_node = self.to_node
+        node_list.append((temp_node, self.collected_node_dict[temp_node][0]))
+        while self.collected_node_dict[temp_node][1] != -1:
+            temp_node = self.collected_node_dict[temp_node][1]
+            node_list.append((temp_node, self.collected_node_dict[temp_node][0]))
+        node_list.reverse()
+        return node_list
+
+
+def set_node_map(node_map, node, node_list):
+    for x, y, val in node_list:
+        node_map[node.index(x)][node.index(y)] = node_map[node.index(y)][node.index(x)] = val
+
+
+## init node_map to 0
+node_map = [[0 for val in range(len(node))] for val in range(len(node))]
+
+## set node_map
+route = []
+set_node_map(node_map, node, node_list)
+for m in range(0,car_array.shape[0]):
+    ## select one node to obj node, e.g. A --> D(node[0] --> node[3])
+    from_node = node.index(car_array[m,1])
+    to_node = node.index(car_array[m,2])
+    dijkstrapath = Dijkstra_Path(node_map)
+    path = dijkstrapath(from_node, to_node)
+    answer = [car_array[m,i] for i in {0,1}]
+    for i in range(0,len(path)):
+        a = path[i][0]
+        answer.append(a)
+    answer.append(car_array[m,2])
+    route.append(answer)
 
 def get_road_from_two_cross(cross_id1,cross_id2):    
-    for i in range(road_data.shape[0]):
-        if (cross_id1 == road_data.iloc[i,4] and cross_id2 == road_data.iloc[i,5]):
-            return road_data.iloc[i,0]
-        elif road_data.iloc[i,6]:#duplex
-            if (cross_id2 == road_data.iloc[i,4] and cross_id1 == road_data.iloc[i,5]):
-                return road_data.iloc[i,0]
-
-route = []
-# get shortest route
-for i in range(car_data.shape[0]):
-    route_i = [car_data.iloc[i,0]]
-    #route_i.append(nx.shortest_path(D,car_data.iloc[i,1],car_data.iloc[i,2]))
-    route_i.append(dijsktra(graph,str(car_data.iloc[i,1]),str(car_data.iloc[i,2])))
-    route.append(route_i)
+    for i in range(road_array.shape[0]):
+        if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
+            return road_array[i,0]
+        elif road_array[i,6]:#duplex
+            if (cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]):
+                return road_array[i,0]
 
 route_road = []
 j = 0
 for i in route:
-    route_i_road = [int(i[0])]  #car id
+    route_i_road = [i[0]]  #car id
     
     # plant time
-    route_i_road.append(int(car_data.iloc[j,4]))
+    route_i_road.append(car_array[j,4])
     #add car route
-    route_i_road.append([get_road_from_two_cross(int(i[-1][j]),int(i[-1][j+1])) for j in range(len(i[-1])-1)])
+    route_i_road.append([get_road_from_two_cross(i[j],i[j+1]) for j in range(1,len(i)-1)])
     route_road.append(route_i_road)
     j += 1
+
+answer_path = '../config/answer.txt'
 
 with open(answer_path, 'w') as f:
     f.write('#(carId,StartTime,RoadId...)\n')
@@ -121,4 +174,3 @@ with open(answer_path, 'w') as f:
         #f.write('(')
         f.write('('+str(route_road[i]).replace('[','').replace(']','').replace("'",""))
         f.write(')\n')
-

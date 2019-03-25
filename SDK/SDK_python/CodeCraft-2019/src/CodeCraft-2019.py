@@ -1,7 +1,8 @@
 import logging
 import sys
 import pandas as pd
-from collections import defaultdict
+import numpy as np
+#from collections import defaultdict
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='../../logs/CodeCraft-2019.log',
@@ -52,15 +53,19 @@ def main():
             with the two nodes as a tuple as the key
             e.g. {('X', 'A'): 7, ('X', 'B'): 2, ...}
             """
-            self.edges = defaultdict(list)
+            self.edges = {}
             self.weights = {}
         
         def add_edge(self, from_node, to_node, weight):
             # Note: assumes edges are bi-directional
-            self.edges[from_node].append(to_node)
-            self.edges[to_node].append(from_node)
+            if from_node in self.edges:
+                self.edges[from_node].append(to_node)
+            else:
+                self.edges[from_node] = [to_node]
+
+            #self.edges[to_node].append(from_node)
             self.weights[(from_node, to_node)] = weight
-            self.weights[(to_node, from_node)] = weight
+            #self.weights[(to_node, from_node)] = weight
     
     graph = Graph()
     
@@ -72,6 +77,10 @@ def main():
 
     for edge in road:
         graph.add_edge(*edge)
+    
+#    edgess = graph.edges
+#    weights = graph.weights
+    
     
     def dijsktra(graph, initial, end):
         # shortest paths is a dict of nodes
@@ -109,7 +118,9 @@ def main():
         # Reverse path
         path = path[::-1]
         return path
-        
+    
+    #print(dijsktra(graph, '1', '34'))
+    
     def get_road_from_two_cross(cross_id1,cross_id2):    
         for i in range(road_data.shape[0]):
             if (cross_id1 == road_data.iloc[i,4] and cross_id2 == road_data.iloc[i,5]):
@@ -132,7 +143,11 @@ def main():
         route_i_road = [int(i[0])]  #car id
         
         # plant time
-        route_i_road.append(int(car_data.iloc[j,4]))
+        delay_chance = np.random.uniform(0, 1)
+        if delay_chance > 0.5:
+            route_i_road.append(int(car_data.iloc[j,4]) + 1)
+        else:
+            route_i_road.append(int(car_data.iloc[j,4]))
         #add car route
         route_i_road.append([get_road_from_two_cross(int(i[-1][j]),int(i[-1][j+1])) for j in range(len(i[-1])-1)])
         route_road.append(route_i_road)
