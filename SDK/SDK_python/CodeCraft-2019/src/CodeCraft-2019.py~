@@ -88,7 +88,7 @@ def main():
                 if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
                     Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])
                     if road_array[m,6] == 1:
-                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])#是否写负
+                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2])#是否写负
     #print(Matrix)
 
     data_weight = np.zeros([max,max])
