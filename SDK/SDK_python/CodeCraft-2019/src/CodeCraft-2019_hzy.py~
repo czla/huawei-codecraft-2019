@@ -80,16 +80,16 @@ def main():
         Matrix[i,0] = i
     #print(Matrix)
 
-    #Matrix[行，列] = [终点，起点]
     w_c = 0.4
+    #Matrix[行，列] = [终点，起点]
     for i in range(1,max+1):
         for j in range(1,max+1):
             for m in range(0,road_array.shape[0]):
                 if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
-                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3]+ np.random.randint(1,10))
+                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])
                     if road_array[m,6] == 1:
-                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3]+ np.random.randint(1,10))#是否写负
-    #print(Matrix)
+                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])#是否写负
+    print(Matrix)
 
     data_weight = np.zeros([max,max])
     for i in range(0,max):
@@ -160,7 +160,7 @@ def main():
             key = d2[key]
         #print(d3)
         route.append(d3)
-    #print(route)
+    print(route)
         #route = []
         #route.extend(d3)
 
@@ -179,15 +179,13 @@ def main():
     for i in route:
         route_i_road = [int(car_array[j,0])]  #car id
         delay_chance = np.random.uniform(0, 1)
-        if delay_chance < 0.3:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,300))
-        elif delay_chance < 0.7:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(300,900))
+        
+        if delay_chance > 0.4:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,500))
         else:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(900,1200))
-
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,30))
         # plant time
-        #route_i_road.append(int(car_array[j,4]))
+#        route_i_road.append(int(car_array[j,4]))
         #add car route
         route_i_road.append([get_road_from_two_cross(i[j],i[j+1]) for j in range(len(i)-1)])
         route_road.append(route_i_road)
