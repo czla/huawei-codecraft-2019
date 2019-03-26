@@ -186,10 +186,10 @@ def main():
         elif delay_chance < 0.6:
             route_i_road.append(int(car_array[j,4]) + np.random.randint(300,400))
 
-        elif delay_chance < 0.8:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,500))
+#        elif delay_chance < 0.8:
+#            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,500))
         else:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(500,600))
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,550))
 
         # plant time
         #route_i_road.append(int(car_array[j,4]))
