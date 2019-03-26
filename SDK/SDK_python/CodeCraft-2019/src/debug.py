@@ -102,7 +102,7 @@ for i in range(1,max+1):
     for j in range(1,max+1):
         for m in range(0,road_array.shape[0]):
             if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
-                Matrix[i,j] = road_array[m,1]/road_array[m,2] - w_c*road_array[m,3]
+                Matrix[i,j] = road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])
                 if road_array[m,6] == 1:
                     Matrix[j,i] = float(road_array[m,1]/road_array[m,2] - w_c*road_array[m,3])#是否写负
 #print(Matrix)

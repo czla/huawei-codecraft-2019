@@ -81,14 +81,14 @@ def main():
     #print(Matrix)
 
     #Matrix[行，列] = [终点，起点]
-    w_c = 0.4
+    w_c = 0.2
     for i in range(1,max+1):
         for j in range(1,max+1):
             for m in range(0,road_array.shape[0]):
                 if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
-                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3]+ np.random.randint(1,10))
+                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3])
                     if road_array[m,6] == 1:
-                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3]+ np.random.randint(1,10))#是否写负
+                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3])#是否写负
     #print(Matrix)
 
     data_weight = np.zeros([max,max])
@@ -179,12 +179,17 @@ def main():
     for i in route:
         route_i_road = [int(car_array[j,0])]  #car id
         delay_chance = np.random.uniform(0, 1)
-        if delay_chance < 0.3:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,300))
-        elif delay_chance < 0.7:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(300,900))
+        if delay_chance < 0.2:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,100))
+        elif delay_chance < 0.4:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(100,200))
+        elif delay_chance < 0.6:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(300,400))
+
+        elif delay_chance < 0.8:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,500))
         else:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(900,1200))
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(500,600))
 
         # plant time
         #route_i_road.append(int(car_array[j,4]))
