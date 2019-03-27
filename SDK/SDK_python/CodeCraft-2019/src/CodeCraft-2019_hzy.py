@@ -81,14 +81,14 @@ def main():
     #print(Matrix)
 
     #Matrix[行，列] = [终点，起点]
-    w_c = 0.4
+    w_c = 0.2
     for i in range(1,max+1):
         for j in range(1,max+1):
             for m in range(0,road_array.shape[0]):
                 if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
-                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3]+ np.random.randint(1,10))
+                    Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3])
                     if road_array[m,6] == 1:
-                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3]+ np.random.randint(1,10))#是否写负
+                        Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3])#是否写负
     #print(Matrix)
 
     data_weight = np.zeros([max,max])
@@ -166,11 +166,14 @@ def main():
 
     def get_road_from_two_cross(cross_id1,cross_id2):    
         for i in range(road_array.shape[0]):
-            if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
-                return road_array[i,0]
-            elif road_array[i,6]:#duplex
-                if (cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]):
-                    return road_array[i,0]
+            if not road_array[i, 6]:
+                if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
+                    return int(str(road_array[i,0])+'0')
+            else:#duplex
+                if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
+                    return int(str(road_array[i,0])+'0')
+                elif (cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]):
+                    return int(str(road_array[i,0])+'1')
     
     #plt.hist(car_data['planTime'])
     
@@ -179,10 +182,17 @@ def main():
     for i in route:
         route_i_road = [int(car_array[j,0])]  #car id
         delay_chance = np.random.uniform(0, 1)
-        if delay_chance > 0.3:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,500))
+        if delay_chance < 0.2:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,100))
+        elif delay_chance < 0.4:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(100,200))
+        elif delay_chance < 0.6:
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(300,400))
+
+#        elif delay_chance < 0.8:
+#            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,500))
         else:
-            route_i_road.append(int(car_array[j,4]) + np.random.randint(1,30))
+            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,550))
 
         # plant time
         #route_i_road.append(int(car_array[j,4]))
