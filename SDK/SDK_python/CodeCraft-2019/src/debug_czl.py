@@ -100,7 +100,7 @@
 #
 import matplotlib.pyplot as plt
 answer = []
-with open('../config/map1/answer.txt') as f:
+with open('../config/map2/answer.txt') as f:
     data = f.readlines()
 
     for line in data:

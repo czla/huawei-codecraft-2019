@@ -147,8 +147,9 @@ def main():
         is_again_flag = False
         for  repeat_index, pre_car in enumerate(car_array[:m, :3]):
             if car_array[m][1] == pre_car[1] and car_array[m][2] == pre_car[2]:
-                is_again_flag = True
-                break
+                if abs(car_array[m][3] - car_array[repeat_index][3]) < 4:
+                    is_again_flag = True
+                    break
 
         if is_again_flag:
             # route.append(car_array[m, 2])
@@ -185,10 +186,10 @@ def main():
 
     def get_road_from_two_cross(cross_id1,cross_id2):
         for i in range(road_array.shape[0]):
-            if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
+            if cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]:
                 return road_array[i,0]
             elif road_array[i,6]:#duplex
-                if (cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]):
+                if cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]:
                     return road_array[i,0]
 
     # plt.hist(car_data['planTime'])
@@ -198,37 +199,33 @@ def main():
     j = 0
     for i in route:
         route_i_road = [int(car_array[j, 0])]  # car id
-        # if len(i) <= 5:
-        #     delay_time = np.random.randint(0, 20)
-        # elif len(i) <= 7:
-        #     delay_time = np.random.randint(20, 50)
-        # elif len(i) == 8:
-        #     delay_time = np.random.randint(45, 100)
-        # elif len(i) == 9:
-        #     delay_time = np.random.randint(90, 160)
-        # elif len(i) <= 11:
-        #     delay_time = np.random.randint(150, 230)
-        # # elif len(i) <= 14:
-        # #     delay_time = np.random.randint(230, 310)
-        # else:
-        #     delay_time = np.random.randint(220, 380)
-        # route_i_road.append(int(car_array[j, 4]) + delay_time)
-        if len(i) <= 16:
-            delay_time = np.random.randint(0, 400)
+        if len(i) <= 15 and car_array[j, 3] > 10:
+            delay_time = np.random.randint(0, 600)
+        elif len(i) <= 16:
+            delay_time = np.random.randint(500, 1500)
+        elif len(i) <= 18:
+            delay_time = np.random.randint(1400, 2400)
+        elif len(i) <= 26:
+            delay_time = np.random.randint(2300, 4100)
+        elif car_array[j, 3] < 5:
+            delay_time = np.random.randint(4800, 5200)
         else:
-            delay_chance = np.random.uniform(0, 1)
-            if delay_chance < 0.2:
-                delay_time = np.random.randint(400, 600)
-            elif delay_chance < 0.4:
-                delay_time = np.random.randint(600, 900)
-            elif delay_chance < 0.6:
-                delay_time = np.random.randint(900, 1200)
-            #elif delay_chance < 0.8:
-             #   delay_time = np.random.randint(12000, 950)
-            else:
-                delay_time = np.random.randint(1200, 1500)
+            delay_time = np.random.randint(4000, 4800)
+        #
+        # else:
+        #     delay_chance = np.random.uniform(0, 1)
+        #     if delay_chance < 0.2:
+        #         delay_time = np.random.randint(1000, 1600)
+        #     elif delay_chance < 0.4:
+        #         delay_time = np.random.randint(1600, 2200)
+        #     elif delay_chance < 0.6:
+        #         delay_time = np.random.randint(2200, 2700)
+        #     #elif delay_chance < 0.8:
+        #      #   delay_time = np.random.randint(12000, 950)
+        #     else:
+        #         delay_time = np.random.randint(2700, 3500)
 
-        route_i_road.append(int(car_array[j, 4]) + delay_time)
+        route_i_road.append(int(car_array[j, 4]) * 5 + delay_time)
         # plant time
         #route_i_road.append(int(car_array[j,4]))
         #add car route
@@ -262,3 +259,4 @@ if __name__ == "__main__":
     main()
     #end = time.time()
     #print('runtime: %f'%end - start)
+
