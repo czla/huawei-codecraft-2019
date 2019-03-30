@@ -1,6 +1,7 @@
+# import time
+import numpy as np
 import logging
 import sys
-import numpy as np
 
 #logging.basicConfig(level=logging.DEBUG,
 #                    filename='../logs/CodeCraft-2019.log',
@@ -10,16 +11,17 @@ import numpy as np
 
 
 def main():
-#    if len(sys.argv) != 5:
-#        logging.info('please input args: car_path, road_path, cross_path, answerPath')
-#        exit(1)
 
     car_path = sys.argv[1]
     road_path = sys.argv[2]
     cross_path = sys.argv[3]
     answer_path = sys.argv[4]
 
-    #import pandas
+    # car_path = '../config/map1/car.txt'
+    # road_path = '../config/map1/road.txt'
+    # cross_path = '../config/map1/cross.txt'
+    # answer_path = '../config/map1/answer.txt'
+
 
     cross = open(cross_path)
     car = open(car_path)
@@ -66,42 +68,36 @@ def main():
             max = car_array[i,2]
     #print(max)
     #print(car_array)
-            
-    data_index = []
-    for i in range(1,max+1):
-        data_index.append(i)
-    #print(1 in data_index)
-    #print(data_index)    
 
-        
-    Matrix = np.zeros([max+1,max+1])
-    for i in range(0,max+1):
-        Matrix[0,i] = i
-    for i in range(0,max+1):
-        Matrix[i,0] = i
-    #print(Matrix)
+    cross_real = []
+    with open(cross_path, 'r') as cross:
+        data = cross.readlines()
 
-    #Matrix[行，列] = [终点，起点]
-    w_c = 0.2
-    for i in range(1,max+1):
-        for j in range(1,max+1):
-            for m in range(0,road_array.shape[0]):
-                if Matrix[i,0] == road_array[m,4] and Matrix[0,j] == road_array[m,5]:
-                    # Matrix[i,j] = float(road_array[m,1]/road_array[m,2] - w_c * road_array[m,3])
-                    Matrix[i, j] = float(road_array[m, 1] / road_array[m, 3] - w_c * road_array[m, 2])
-                    if road_array[m,6] == 1:
-                        # Matrix[j,i] = float(road_array[m,1]/road_array[m,2]- w_c * road_array[m,3])#是否写负
-                        Matrix[j, i] = float(road_array[m, 1] / road_array[m, 3] - w_c * road_array[m, 2])  # 是否写负
-    #print(Matrix)
+        for line in data:
+            if '#' in line:
+                continue
+            cross_real.append(int(line.split(',')[0].replace('(', '')))
 
-    data_weight = np.zeros([max,max])
-    for i in range(0,max):
-        for j in range(0,max):
-            data_weight[i,j] = Matrix[i+1,j+1]
-            if i != j and int(data_weight[i,j]) == 0:
-                data_weight[i,j] = -1
-    data_weight[max-1,max-1] = -1
-    #print(data_weight)
+
+    matrix_slow = -1 * np.ones((len(cross_real), len(cross_real)), dtype=float)
+    for i in range(len(cross_real)):
+        matrix_slow[i][i] = 0
+    matrix_normal = matrix_slow.copy()
+    matrix_fast = matrix_slow.copy()
+
+    for road in road_array:
+        from_index, to_index = cross_real.index(road[4]), cross_real.index(road[5])
+        matrix_normal[from_index, to_index] = road[1] / road[3]
+        matrix_slow[from_index, to_index] = road[1] / road[3] + road[2]
+        weight_fast = road[1] / road[3] - road[2]
+        if weight_fast <= 0:
+            weight_fast = 0.5
+        matrix_fast[from_index, to_index] = weight_fast
+        if road[-1] == 1:
+            matrix_normal[to_index, from_index] = road[1] / road[3]
+            matrix_slow[to_index, from_index] = road[1] / road[3] + road[2]
+            matrix_fast[to_index, from_index] = weight_fast
+
 
     #最短路径
     def priority_queue(data, d0):  # 自建优先队列格式
@@ -128,7 +124,7 @@ def main():
                 if data[root_node][i] != -1:  # 检查是否可直连，是
                     if data_index[i] not in [x[0] for x in queue_out]:
                         queue = priority_queue(queue,
-                                               [data_index[i], data[root_node][i] + queue_out[-1][1], queue_out[-1][0]])
+                                                [data_index[i], data[root_node][i] + queue_out[-1][1], queue_out[-1][0]])
             # print(queue)    # 检查优先队列的情况 [['C', 1], ['B', 5]]
 
             for i in range(len(queue)):  # 0,1
@@ -141,77 +137,98 @@ def main():
 
             # print(queue)
             # print('queue_out',queue_out)
-        return queue_out, parent        
-    
+        return queue_out, parent
+
+# def update_graph(data_weight):
+
+
     route = []
-    for m in range(0,car_array.shape[0]):
-        d1, d2 = dijkstra_search(data_weight, data_index, int(car_array[m,1]-1)) # 出发点
-        #print(d1)
-        #print(d2)
+    for m in range(car_array.shape[0]):
+        is_again_flag = False
+        for  repeat_index, pre_car in enumerate(car_array[:m, :3]):
+            if car_array[m][1] == pre_car[1] and car_array[m][2] == pre_car[2]:
+                is_again_flag = True
+                break
 
-        target = car_array[m,2]
-        for i in d1:
-            if i[0] == target:
-                pass
-                #print('路径最短距离为：', i[1])
+        if is_again_flag:
+            # route.append(car_array[m, 2])
+            route.append(route[repeat_index])
 
-        key = target
-        d3 = [target]
-        
-        while key in d2.keys():
-            d3.insert(0, d2[key])
-            key = d2[key]
-        #print(d3)
-        route.append(d3)
-    #print(route)
-        #route = []
+        else:
+            if car_array[m,3] <= 8:
+                d1, d2 = dijkstra_search(matrix_slow, cross_real, cross_real.index(car_array[m,1])) # 出发点
+            elif car_array[m,3] <= 12:
+                d1, d2 = dijkstra_search(matrix_normal, cross_real, cross_real.index(car_array[m, 1]))  # 出发点
+            else:
+                d1, d2 = dijkstra_search(matrix_fast, cross_real, cross_real.index(car_array[m, 1]))  # 出发点
+            #print(d1)
+            #print(d2)
+
+            target = car_array[m,2]     # target cross id
+            # for i in d1:
+            #     if i[0] == target:
+            #         pass
+            #         #print('路径最短距离为：', i[1])
+
+            key = target
+            d3 = [target]
+
+            while key in d2.keys():
+                d3.insert(0, d2[key])
+                key = d2[key]
+            #print(d3)
+            route.append(d3)
+            print('car %d'%(m+1))
+        #print(route)
+            #route = []
         #route.extend(d3)
 
-    def get_road_from_two_cross(cross_id1,cross_id2):    
+    def get_road_from_two_cross(cross_id1,cross_id2):
         for i in range(road_array.shape[0]):
             if (cross_id1 == road_array[i,4] and cross_id2 == road_array[i,5]):
                 return road_array[i,0]
             elif road_array[i,6]:#duplex
                 if (cross_id2 == road_array[i,4] and cross_id1 == road_array[i,5]):
                     return road_array[i,0]
-    
-    #plt.hist(car_data['planTime'])
-    
+
+    # plt.hist(car_data['planTime'])
+
+    # print('plan route done!')
     route_road = []
     j = 0
     for i in route:
-        route_i_road = [int(car_array[j,0])]  #car id
-
+        route_i_road = [int(car_array[j, 0])]  # car id
+        # if len(i) <= 5:
+        #     delay_time = np.random.randint(0, 20)
+        # elif len(i) <= 7:
+        #     delay_time = np.random.randint(20, 50)
+        # elif len(i) == 8:
+        #     delay_time = np.random.randint(45, 100)
+        # elif len(i) == 9:
+        #     delay_time = np.random.randint(90, 160)
+        # elif len(i) <= 11:
+        #     delay_time = np.random.randint(150, 230)
+        # # elif len(i) <= 14:
+        # #     delay_time = np.random.randint(230, 310)
+        # else:
+        #     delay_time = np.random.randint(220, 380)
+        # route_i_road.append(int(car_array[j, 4]) + delay_time)
         if len(i) <= 6:
-            delay_time = np.random.randint(0,30)
+            delay_time = np.random.randint(0, 150)
         else:
             delay_chance = np.random.uniform(0, 1)
             if delay_chance < 0.2:
-                delay_time = np.random.randint(30, 80)
+                delay_time = np.random.randint(150, 350)
             elif delay_chance < 0.4:
-                delay_time = np.random.randint(70,150)
+                delay_time = np.random.randint(350, 550)
             elif delay_chance < 0.6:
-                delay_time = np.random.randint(140,230)
-            # elif delay_chance < 0.8:
-            #     delay_time = np.random.randint(230,350)
+                delay_time = np.random.randint(550, 800)
+            elif delay_chance < 0.8:
+                delay_time = np.random.randint(800, 950)
             else:
-                delay_time = np.random.randint(230,350)
+                delay_time = np.random.randint(950, 1100)
 
         route_i_road.append(int(car_array[j, 4]) + delay_time)
-
-#         delay_chance = np.random.uniform(0, 1)
-#         if delay_chance < 0.2:
-#             route_i_road.append(int(car_array[j,4]) + np.random.randint(1,100))
-#         elif delay_chance < 0.4:
-#             route_i_road.append(int(car_array[j,4]) + np.random.randint(100,200))
-#         elif delay_chance < 0.6:
-#             route_i_road.append(int(car_array[j,4]) + np.random.randint(300,400))
-#
-# #        elif delay_chance < 0.8:
-# #            route_i_road.append(int(car_array[j,4]) + np.random.randint(400,500))
-#         else:
-#             route_i_road.append(int(car_array[j,4]) + np.random.randint(400,550))
-
         # plant time
         #route_i_road.append(int(car_array[j,4]))
         #add car route
@@ -228,7 +245,7 @@ def main():
             f.write('('+str(route_road[i]).replace('[','').replace(']','').replace("'",""))
             f.write(')\n')
 
-    #print('Done')  
+    #print('Done')
 
 #    logging.info("car_path is %s" % (car_path))
 #    logging.info("road_path is %s" % (road_path))
@@ -241,4 +258,7 @@ def main():
 
 
 if __name__ == "__main__":
+    #start = time.time()
     main()
+    #end = time.time()
+    #print('runtime: %f'%end - start)
