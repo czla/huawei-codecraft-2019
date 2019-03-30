@@ -23,26 +23,26 @@ def main():
     # answer_path = '../config/map1/answer.txt'
 
 
-    cross = open(cross_path)
+    # cross = open(cross_path)
     car = open(car_path)
     road = open(road_path)
 
-    cross_lines = cross.readlines()
+    # cross_lines = cross.readlines()
     car_lines = car.readlines()
     road_lines = road.readlines()
 
-    cross_list= []
+    # cross_list= []
     car_list = []
     road_list = []
 
-    for line in cross_lines:
-        if '#' in line:
-            continue
-        newline = line.replace('(','').replace(')','').replace(',','')
-        num = list(map(int,newline.split(" ")))
-        cross_list.append(num)
-    cross_array = np.array(cross_list)
-    #print(cross_array)
+    # for line in cross_lines:
+    #     if '#' in line:
+    #         continue
+    #     newline = line.replace('(','').replace(')','').replace(',','')
+    #     num = list(map(int,newline.split(" ")))
+    #     cross_list.append(num)
+    # cross_array = np.array(cross_list)
+    # #print(cross_array)
 
     for line in car_lines:
         if '#' in line:
@@ -213,20 +213,20 @@ def main():
         # else:
         #     delay_time = np.random.randint(220, 380)
         # route_i_road.append(int(car_array[j, 4]) + delay_time)
-        if len(i) <= 6:
-            delay_time = np.random.randint(0, 150)
+        if len(i) <= 16:
+            delay_time = np.random.randint(0, 400)
         else:
             delay_chance = np.random.uniform(0, 1)
             if delay_chance < 0.2:
-                delay_time = np.random.randint(150, 350)
+                delay_time = np.random.randint(400, 600)
             elif delay_chance < 0.4:
-                delay_time = np.random.randint(350, 550)
+                delay_time = np.random.randint(600, 900)
             elif delay_chance < 0.6:
-                delay_time = np.random.randint(550, 800)
-            elif delay_chance < 0.8:
-                delay_time = np.random.randint(800, 950)
+                delay_time = np.random.randint(900, 1200)
+            #elif delay_chance < 0.8:
+             #   delay_time = np.random.randint(12000, 950)
             else:
-                delay_time = np.random.randint(950, 1100)
+                delay_time = np.random.randint(1200, 1500)
 
         route_i_road.append(int(car_array[j, 4]) + delay_time)
         # plant time
